@@ -17,9 +17,9 @@ STD = $(TD $(SMALL $0))
 module mir.ndslice.slice;
 
 import std.traits;
-import std.meta;
-import std.typecons; //: Flag;
-
+import std.typecons : Flag;
+import mir.compat.meta : allSatisfy, staticMap;
+import mir.compat;
 import mir.ndslice.internal;
 
 /++
@@ -165,7 +165,7 @@ template sliced(Names...)
         alias RS = AliasSeq!(" ~ _Range_Types!Names ~ ");"
         ~ q{
             import std.range.primitives: hasLength;
-            import std.meta: staticMap;
+            import mir.compat.meta : staticMap;
             static assert(!anySatisfy!(_isSlice, RS),
                 `Packed slices are not allowed in slice tuples`
                 ~ tailErrorMessage!());
@@ -513,7 +513,7 @@ template assumeSameStructure(Names...)
     {
         alias RS = AliasSeq!("  ~_Range_Types!Names ~ ");"
         ~ q{
-            import std.meta: staticMap;
+            import mir.compat.meta : staticMap;
             static assert(!anySatisfy!(_isSlice, RS),
                 `Packed slices not allowed in slice tuples`
                 ~ tailErrorMessage!());
@@ -955,7 +955,7 @@ struct Slice(size_t _N, _Range)
     +/
     size_t[N] shape() @property const
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         return _lengths[0 .. N];
     }
 
@@ -987,7 +987,7 @@ struct Slice(size_t _N, _Range)
    +/
     Structure!N structure() @property const
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         return typeof(return)(_lengths[0 .. N], _strides[0 .. N]);
     }
 
@@ -1066,7 +1066,7 @@ struct Slice(size_t _N, _Range)
     size_t length(size_t dimension = 0)() @property const
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         return _lengths[dimension];
     }
 
@@ -1128,7 +1128,7 @@ struct Slice(size_t _N, _Range)
     @property const
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         return _lengths[dimension] == 0;
     }
 
@@ -1224,7 +1224,7 @@ struct Slice(size_t _N, _Range)
     void popFront(size_t dimension = 0)()
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         assert(_lengths[dimension], __FUNCTION__ ~ ": length!" ~ dimension.stringof ~ " should be greater than 0.");
         _lengths[dimension]--;
         _ptr += _strides[dimension];
@@ -1234,7 +1234,7 @@ struct Slice(size_t _N, _Range)
     void popBack(size_t dimension = 0)()
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         assert(_lengths[dimension], __FUNCTION__ ~ ": length!" ~ dimension.stringof ~ " should be greater than 0.");
         _lengths[dimension]--;
     }
@@ -1243,7 +1243,7 @@ struct Slice(size_t _N, _Range)
     void popFrontExactly(size_t dimension = 0)(size_t n)
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         assert(n <= _lengths[dimension], __FUNCTION__ ~ ": n should be less than or equal to length!" ~ dimension.stringof);
         _lengths[dimension] -= n;
         _ptr += _strides[dimension] * n;
@@ -1253,7 +1253,7 @@ struct Slice(size_t _N, _Range)
     void popBackExactly(size_t dimension = 0)(size_t n)
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         assert(n <= _lengths[dimension], __FUNCTION__ ~ ": n should be less than or equal to length!" ~ dimension.stringof);
         _lengths[dimension] -= n;
     }
@@ -1262,7 +1262,7 @@ struct Slice(size_t _N, _Range)
     void popFrontN(size_t dimension = 0)(size_t n)
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         import std.algorithm.comparison: min;
         popFrontExactly!dimension(min(n, _lengths[dimension]));
     }
@@ -1271,7 +1271,7 @@ struct Slice(size_t _N, _Range)
     void popBackN(size_t dimension = 0)(size_t n)
         if (dimension < N)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         import std.algorithm.comparison: min;
         popBackExactly!dimension(min(n, _lengths[dimension]));
     }
@@ -1450,7 +1450,7 @@ struct Slice(size_t _N, _Range)
     }
     body
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         return typeof(return)(i, j);
     }
 
@@ -2363,7 +2363,7 @@ private struct PtrShell(Range)
     void opOpAssign(string op)(sizediff_t shift)
         if (op == `+` || op == `-`)
     {
-        pragma(inline, true);
+        static if (hasPragmaInline) pragma(inline, true);
         mixin (`_shift ` ~ op ~ `= shift;`);
     }
 

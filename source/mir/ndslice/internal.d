@@ -1,7 +1,7 @@
 module mir.ndslice.internal;
 
+import mir.compat.meta : AliasSeq, anySatisfy, Filter, Reverse;
 import std.traits;
-import std.meta; //: AliasSeq, anySatisfy, Filter, Reverse;
 
 package:
 

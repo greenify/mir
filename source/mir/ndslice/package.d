@@ -503,7 +503,7 @@ pure nothrow unittest
 pure nothrow unittest
 {
     import mir.ndslice.internal: Iota;
-    import std.meta: AliasSeq;
+    import mir.compat.meta : AliasSeq;
     import std.range;
     import std.typecons: Tuple;
     foreach (R; AliasSeq!(
