@@ -10,6 +10,8 @@ import mir.ndslice.slice;
 import mir.sparse;
 
 /++
+General matrix-matrix multiplication.
+
 Params:
     alpha = scalar
     a = sparse matrix (CSR format)
@@ -38,7 +40,7 @@ body
     import mir.ndslice.iteration: transposed;
     b = b.transposed;
     c = c.transposed;
-    foreach(x; b)
+    foreach (x; b)
     {
         import mir.sparse.blas.gemv: gemv;
         gemv(alpha, a, x, beta, c.front);
@@ -77,6 +79,8 @@ unittest
 
 
 /++
+General matrix-matrix multiplication with transformation.
+
 Params:
     alpha = scalar
     a = sparse matrix (CSR format)
@@ -105,7 +109,7 @@ body
     import mir.ndslice.iteration: transposed;
     b = b.transposed;
     c = c.transposed;
-    foreach(x; b)
+    foreach (x; b)
     {
         import mir.sparse.blas.gemv: gemtv;
         gemtv(alpha, a, x, beta, c.front);
@@ -146,6 +150,7 @@ unittest
 }
 
 /++
+Selective general matrix multiplication with selector sparse matrix.
 Params:
     a = dense matrix
     b = dense matrix
@@ -163,8 +168,8 @@ in
 {
     assert(a.length!1 == b.length!0);
     assert(c.length!0 == a.length!0);
-    foreach(r; c)
-        if(r.indexes.length)
+    foreach (r; c)
+        if (r.indexes.length)
             assert(r.indexes[$-1] < b.length!1);
 }
 body
@@ -173,7 +178,7 @@ body
     import mir.sparse.blas.gemv: selectiveGemv;
 
     b = b.transposed;
-    foreach(r; c)
+    foreach (r; c)
     {
         selectiveGemv!op(b, a.front, r);
         a.popFront;
@@ -196,11 +201,6 @@ unittest
          [-4.0, -2, -2, 2],
          [-1.0, 9, 4, 8],
          [9.0, 8, 3, -2]];
-
-    // a * b ==
-    //    [[-42.0, 35, -7, 77],
-    //     [-69.0, -21, -42, 21],
-    //     [23.0, 69, 3, 29]]);
 
     auto cs = sparse!double(3, 4);
     cs[0, 2] = 1;

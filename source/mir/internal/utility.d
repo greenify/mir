@@ -23,7 +23,7 @@ auto toDense(R)(Slice!(1, R) x)
 {
     assert(x.stride == 1);
     auto ptr = x.ptr;
-    static if(isPointer!R)
+    static if (isPointer!R)
     {
         return ptr[0 .. x.length];
     }
@@ -39,19 +39,3 @@ alias ConstData(S : T[], T) = const(T)[];
 
 enum isVector(V) = is(V : T1[], T1) || is(V : Slice!(1, T2*), T2);
 enum isMatrix(M) = is(M : Slice!(2, T*), T);
-
-//enum isConstVector(T) ==
-//    is(Slice!(1,           T [])) ||
-//    is(Slice!(1, const    (T)[])) ||
-//    is(Slice!(1, immutable(T)[])) ||
-//    is(Slice!(1,           T * )) ||
-//    is(Slice!(1, const    (T)* )) ||
-//    is(Slice!(1, immutable(T)* )) ;
-
-//enum isConstMatrix(T) ==
-//    is(Slice!(2,           T [])) ||
-//    is(Slice!(2, const    (T)[])) ||
-//    is(Slice!(2, immutable(T)[])) ||
-//    is(Slice!(2,           T * )) ||
-//    is(Slice!(2, const    (T)* )) ||
-//    is(Slice!(2, immutable(T)* )) ;

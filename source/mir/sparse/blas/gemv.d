@@ -10,6 +10,8 @@ import mir.ndslice.slice;
 import mir.sparse;
 
 /++
+General matrix-vector multiplication.
+
 Params:
     alpha = scalar
     a = sparse matrix (CSR format)
@@ -35,17 +37,17 @@ in
 body
 {
     import mir.internal.utility;
-    static if(isSimpleSlice!V2)
+    static if (isSimpleSlice!V2)
     {
-        if(x.stride == 1)
+        if (x.stride == 1)
         {
             gemv(alpha, a, x.toDense, beta, y);
             return;
         }
     }
-    if(beta)
+    if (beta)
     {
-        foreach(ref e; y)
+        foreach (ref e; y)
         {
             import mir.sparse.blas.dot;
             e = alpha * dot(a.front, x) + beta * e;
@@ -54,7 +56,7 @@ body
     }
     else
     {
-        foreach(ref e; y)
+        foreach (ref e; y)
         {
             import mir.sparse.blas.dot;
             e = alpha * dot(a.front, x);
@@ -103,6 +105,8 @@ unittest
 }
 
 /++
+General matrix-vector multiplication with transformation.
+
 Params:
     alpha = scalar
     a = sparse matrix (CSR format)
@@ -130,9 +134,9 @@ body
     import mir.internal.utility;
     alias T3 = Unqual!(ForeachType!V3);
 
-    static if(isSimpleSlice!V3)
+    static if (isSimpleSlice!V3)
     {
-        if(y.stride == 1)
+        if (y.stride == 1)
         {
             gemtv(alpha, a, x, T3(beta), y.toDense);
             return;
@@ -143,14 +147,14 @@ body
     {
         y[] = 0;
     }
-    if(beta == 1)
+    if (beta == 1)
     {
     }
     else
     {
         y[] *= T3(beta);
     }
-    foreach(ref t; x)
+    foreach (ref t; x)
     {
         import mir.sparse.blas.axpy;
         axpy(alpha * t, a.front, y);
@@ -196,13 +200,15 @@ unittest
     auto y = [1.0, 2, 3].sliced;
     auto t = [131.0, 1056.0, 1056.0];
     t[] *= alpha;
-    foreach(i, ref e; t)
+    foreach (i, ref e; t)
         e += y[i] * beta;
     gemtv(alpha, a, x, beta, y);
     assert(t == y);
 }
 
 /++
+General matrix-vector multiplication for sparse vectors.
+
 Params:
     alpha = scalar
     a = dense matrix
@@ -227,17 +233,17 @@ in
 body
 {
     import mir.internal.utility;
-    static if(isSimpleSlice!V3)
+    static if (isSimpleSlice!V3)
     {
-        if(y.stride == 1)
+        if (y.stride == 1)
         {
             gemv(alpha, a, x, beta, y.toDense);
             return;
         }
     }
-    if(beta)
+    if (beta)
     {
-        foreach(ref e; y)
+        foreach (ref e; y)
         {
             import mir.sparse.blas.dot;
             e = alpha * dot(x, a.front) + beta * e;
@@ -246,7 +252,7 @@ body
     }
     else
     {
-        foreach(ref e; y)
+        foreach (ref e; y)
         {
             import mir.sparse.blas.dot;
             e = alpha * dot(x, a.front);
@@ -276,6 +282,8 @@ unittest
 }
 
 /++
+Selective general matrix-vector multiplication with a selector sparse vector.
+
 Params:
     a = dense matrix
     x = dense vector
@@ -288,7 +296,7 @@ void selectiveGemv(string op = "", T, V3 : CompressedArray!(T3, I3), T3, I3)
 in
 {
     assert(a.length!1 == x.length);
-    if(y.indexes.length)
+    if (y.indexes.length)
         assert(y.indexes[$-1] < a.length);
 }
 body
@@ -296,7 +304,7 @@ body
     import mir.ndslice.iteration: transposed;
     import mir.blas.dot;
 
-    foreach(i, j; y.indexes)
+    foreach (i, j; y.indexes)
     {
         mixin(`y.values[i] ` ~ op ~ `= dot(a[j], x);`);
     }

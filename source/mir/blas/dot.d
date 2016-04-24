@@ -7,8 +7,10 @@ module mir.blas.dot;
 
 import mir.ndslice.slice;
 import std.traits;
+import mir.internal.utility: isVector;
 
 /++
+Computes a dot product (inner product) of two vectors.
 Params:
     x = vector
     y = vector
@@ -18,8 +20,7 @@ Note:
     `dot` implementation is naive for now.
 +/
 auto dot(V1, V2)(scope V1 x, scope V2 y)
-    if ((isDynamicArray!V1 || is(V1 : Slice!(1, T1*), T1)) &&
-        (isDynamicArray!V2 || is(V2 : Slice!(1, T2*), T2)) &&
+    if (isVector!V1 && isVector!V2 &&
         is(Unqual!(ForeachType!V1) == Unqual!(ForeachType!V2)))
 in
 {
@@ -28,12 +29,12 @@ in
 body
 {
     alias T = Unqual!(ForeachType!V1);
-    static if(isDynamicArray!V1 && isDynamicArray!V2)
+    static if (isDynamicArray!V1 && isDynamicArray!V2)
     {
         return dotImpl(x, y);
     }
     else
-    static if(isDynamicArray!V1 && !isDynamicArray!V2)
+    static if (isDynamicArray!V1 && !isDynamicArray!V2)
     {
         import mir.internal.utility;
         return
@@ -42,7 +43,7 @@ body
                 dotImpl(x, y);
     }
     else
-    static if(!isDynamicArray!V1 && isDynamicArray!V2)
+    static if (!isDynamicArray!V1 && isDynamicArray!V2)
     {
         import mir.internal.utility;
         return
@@ -81,8 +82,7 @@ unittest
 
     auto x = [1.0, 0, 0, 3, 0, 4, 0, 0, 0, 9, 13];
     auto y = [0.0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    auto r = 0 + 3 * 3 + 5 * 4 + 9 * 9 + 10 * 13;
-
+    auto r = 0 + 3 * 3 + 4 * 5 + 9 * 9 + 13 * 10;
 
     assert(dot(x, y) == r);
     assert(dot(x, y.sliced) == r);
@@ -97,7 +97,7 @@ pragma(inline, false) package(mir.blas)
     {
         //import mir.internal.math: fmuladd;
         T s = 0;
-        foreach(size_t i; 0 .. x.length)
+        foreach (size_t i; 0 .. x.length)
         {
             s = x[i] * y[i] + s;
         }
@@ -108,7 +108,7 @@ pragma(inline, false) package(mir.blas)
     {
         import mir.internal.math: fmuladd;
         T s = 0;
-        foreach(ref xe; x)
+        foreach (ref xe; x)
         {
             s = xe * y.front + s;
             y.popFront;
@@ -120,7 +120,7 @@ pragma(inline, false) package(mir.blas)
     {
         import mir.internal.math: fmuladd;
         T s = 0;
-        foreach(ref xe; x)
+        foreach (ref xe; x)
         {
             s = xe * y.front + s;
             y.popFront;

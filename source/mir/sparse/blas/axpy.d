@@ -10,6 +10,8 @@ import mir.ndslice.slice;
 import mir.sparse;
 
 /++
+Constant times a vector plus a vector.
+
 Params:
     x = sparse vector
     y = dense vector
@@ -25,26 +27,24 @@ void axpy(
     if (isDynamicArray!V2 || is(V2 : Slice!(1, V2R), V2R))
 in
 {
-    if(x.indexes.length)
+    if (x.indexes.length)
         assert(x.indexes[$-1] < y.length);
 }
 body
 {
     import mir.internal.utility;
-    static if(isSimpleSlice!V2)
+    static if (isSimpleSlice!V2)
     {
-        if(y.stride == 1)
+        if (y.stride == 1)
         {
             axpy(alpha, x, y.toDense);
             return;
         }
     }
 
-    foreach(size_t i; 0 .. x.indexes.length)
+    foreach (size_t i; 0 .. x.indexes.length)
     {
         auto j = x.indexes[i];
-        //import mir.internal.math: fmuladd;
-        //y[j] = fmuladd(alpha, x.values[i], y[j]);
         y[j] = alpha * x.values[i] + y[j];
     }
 }
