@@ -55,7 +55,7 @@ struct Discrete(T)
     import std.range : SortedRange;
 
     private const(T)[] _cdPoints;
-    private SortedRange!(const(T)[], "a <= b") r;
+    private SortedRange!(const(T)[], "a <= b") _cdSortedRange;
 
     /**
     The cumulative density points `cdPoints` are assumed to be sorted and given
@@ -68,7 +68,7 @@ struct Discrete(T)
     this(const(T)[] cdPoints)
     {
         _cdPoints = cdPoints;
-        r = typeof(r)(_cdPoints);
+        _cdSortedRange = typeof(_cdSortedRange)(_cdPoints);
     }
 
     /// cumulative density points
@@ -89,14 +89,14 @@ struct Discrete(T)
     {
         import std.random : uniform;
         T v = uniform!("[)", T, T)(0, _cdPoints[$-1], gen);
-        return (cast(SortedRange!(const(T)[], "a <= b")) r).lowerBound(v).length;
+        return (cast(SortedRange!(const(T)[], "a <= b")) _cdSortedRange).lowerBound(v).length;
     }
 }
 
 unittest
 {
     import std.random : Random;
-    auto rndGen = Random(42);
+    auto gen = Random(42);
 
     // 10%, 20%, 20%, 40%, 10%
     auto cdPoints = [0.1, 0.3, 0.5, 0.9, 1];
@@ -104,13 +104,13 @@ unittest
 
     auto obs = new uint[cdPoints.length];
     foreach (i; 0..1000)
-        obs[ds(rndGen)]++;
+        obs[ds(gen)]++;
 }
 
 unittest
 {
     import std.random : Random;
-    auto rndGen = Random(42);
+    auto gen = Random(42);
 
     // 1, 2, 1
     auto cdPoints = [1, 3, 4];
@@ -119,5 +119,5 @@ unittest
 
     auto obs = new uint[cdPoints.length];
     foreach (i; 0..1000)
-        obs[ds(rndGen)]++;
+        obs[ds(gen)]++;
 }
