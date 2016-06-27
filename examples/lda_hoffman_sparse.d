@@ -1,7 +1,14 @@
+#!/usr/bin/env dub
+/+ dub.sdl:
+name "lda_hoffman_sparse"
+dependency "mir" version=">0.15.1"
++/
+
 /++
 Butch LDA using online LDA
 +/
 import std.file;
+import std.path;
 import std.string;
 import std.utf;
 import std.conv;
@@ -13,9 +20,15 @@ import mir.sparse;
 import mir.model.lda.hoffman;
 
 
-void main()
+void main(string[] args)
 {
-	auto stop = "data/stop_words"
+    string curFolder;
+    if (args.length > 1)
+        curFolder = args[1];
+    else
+        curFolder = thisExePath.dirName;
+
+	auto stop = curFolder.buildPath("data/stop_words")
 		.readText
 		.lineSplitter
 		.map!(toLower)
@@ -25,7 +38,7 @@ void main()
 	foreach(word; stop)
 		stopSet[word] = true;
 
-	auto dict = "data/words"
+	auto dict = curFolder.buildPath("data/words")
 		.readText
 		.lineSplitter
 		.map!(toLower)
@@ -37,7 +50,7 @@ void main()
 		.array
 		;
 
-	auto docs = "data/trndocs.dat"
+	auto docs = curFolder.buildPath("data/trndocs.dat")
 		.readText
 		.splitLines
 		;
@@ -57,7 +70,7 @@ void main()
 	auto comp = collection.compress;
 	auto k = 100;
 	import std.parallelism;
-	auto lda = LdaSparseHoffman!double(
+	auto lda = LdaHoffman!double(
 		k, // topics count
 		dict.length, // dictionary length
 		comp.length, // ~ value of documents
