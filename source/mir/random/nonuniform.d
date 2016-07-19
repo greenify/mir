@@ -23,14 +23,11 @@ Returns:
 */
 auto normal(T, UIntType = uint)()
 {
-    import mir.internal.math : exp, log, sqrt;
+    return Normal!(T, UIntType)(true);
+}
 
-    auto pdf    = (T x) => cast(T) exp(T(-0.5) * x * x);
-    auto invPdf = (T x) => cast(T) sqrt(T(-2) * log(x));
-
-    // values from [Marsaglia00]
-    T rightEnd = 3.442619855899;
-
+struct Normal(T, UIntType = uint)
+{
     /// generate x for the last block (aka tail-block)
     enum fallback = q{
         T fallback(RNG)(bool isPositive, ref RNG gen) const
@@ -50,7 +47,34 @@ auto normal(T, UIntType = uint)()
         }
     };
 
-    return Ziggurat!(T, fallback, UIntType, true)(pdf, invPdf, 128, rightEnd, T(9.91256303526217e-3));
+    Ziggurat!(T, fallback, UIntType, true) z;
+
+    this(bool foo)
+    {
+        import mir.internal.math : exp, log, sqrt;
+
+        auto pdf    = (T x) => cast(T) exp(T(-0.5) * x * x);
+        auto invPdf = (T x) => cast(T) sqrt(T(-2) * log(x));
+
+        // values from [Marsaglia00]
+        T rightEnd = 3.442619855899;
+        T blockArea = 9.91256303526217e-3;
+
+        z = typeof(z)(pdf, invPdf, 128, rightEnd, blockArea);
+    }
+
+    /// samples a value from the discrete distribution
+    T opCall() const
+    {
+        import std.random : rndGen;
+        return z(rndGen);
+    }
+
+    /// samples a value from the discrete distribution using a custom random generator
+    T opCall(RNG)(ref RNG gen) const
+    {
+        return z(gen);
+    }
 }
 
 /**
