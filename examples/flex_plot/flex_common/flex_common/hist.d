@@ -119,7 +119,8 @@ body
 
     // save file
     pythonContext.py_stmts(`
-        plt.title(title)
+        if len(title) > 0:
+            plt.title(title)
         plt.savefig(fileName, bbox_inches='tight')
         plt.close()
     `);

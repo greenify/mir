@@ -127,7 +127,8 @@ auto npPlotHatAndSqueeze(S, Pdf)(in FlexInterval!S[] intervals, Pdf pdf,
         import numpy as np
     `);
     scope(exit) pythonContext.py_stmts(`
-        plt.title(title)
+        if len(title) > 0:
+            plt.title(title)
         plt.xlim(xmin, xmax)
         plt.savefig(fileName, bbox_inches='tight', format="pdf")
         plt.close()

@@ -47,6 +47,9 @@ struct CFlex(S)
     // which histogram type should be used
     string histType = "step";
 
+    /// whether the title should be plotted
+    bool plotTitle = true;
+
     // @@@BUG@@@ template injection doesn't work with opCall
     /**
     Creates a Flex instance given the input parameter and plots it.
@@ -96,13 +99,17 @@ struct CFlex(S)
         string fileName = plotDir.buildPath(name) ~ suffixName;
 
         // the title should contain all relevant information
-        string title = name ~ ", ";
-        if (tf.intervals[0].c == tf.intervals[1].c)
-          title ~= "c = %g".format(tf.intervals[0].c);
-        else
-          title ~= "c = %(%g %)".format(tf.intervals.map!`a.c`);
+        string title;
+        if (plotTitle)
+        {
+            title = name ~ ", ";
+            if (tf.intervals[0].c == tf.intervals[1].c)
+              title ~= "c = %g".format(tf.intervals[0].c);
+            else
+              title ~= "c = %(%g %)".format(tf.intervals.map!`a.c`);
 
-        title ~= ", rho=%g, points=[%(%g, %)]".format(rho, points);
+            title ~= ", rho=%g, points=[%(%g, %)]".format(rho, points);
+        }
 
         // first plot hat/squeeze in case we crash during sampling
         tf.intervals.npPlotHatAndSqueeze(pdf, fileName ~ "_hs.pdf", title,
@@ -120,7 +127,8 @@ struct CFlex(S)
             if (plotHistogram || plotCumulativeHistogram)
             {
                 HistogramConfig hc;
-                hc.title = title;
+                if (plotTitle)
+                    hc.title = title;
                 hc.numBins = numBins;
                 hc.stepSize = stepSize;
                 hc.plotReference = plotReference;
